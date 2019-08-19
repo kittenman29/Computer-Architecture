@@ -5,9 +5,17 @@ import sys
 class CPU:
     """Main CPU class."""
 
-    def __init__(self):
+    def __init__(self, CPU=[0]*32, R0=0b00000000, R1=0b00000001, R2=0b00000010, R3=0b00000011, R4=0b00000100, R5=0b00000101, R6=0b00000110, R7=0b00000111):
         """Construct a new CPU."""
-        pass
+        self.CPU = CPU
+        self.R0 = R0
+        self.R1 = R1
+        self.R2 = R2
+        self.R3 = R3
+        self.R4 = R4
+        self.R5 = R5
+        self.R6 = R6
+        self.R7 = R7
 
     def load(self):
         """Load a program into memory."""
