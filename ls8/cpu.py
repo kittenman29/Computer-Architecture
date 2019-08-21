@@ -2,6 +2,21 @@
 
 import sys
 
+
+# stack pointer
+sp = 7
+
+HLT  = 0b00000001
+LDI  = 0b10000010
+PRN  = 0b01000111
+MUL  = 0b10100010
+PUSH = 0b01000101
+POP  = 0b01000110
+# print("LDI", LDI)
+# print("PRN", PRN)
+# print("HLT", HLT)
+# print("MUL", MUL)
+
 class CPU:
     """Main CPU class."""
 
@@ -11,6 +26,7 @@ class CPU:
         self.halted = False
         self.ram = [0] * 256
         self.reg = [0] * 8
+        self.reg[sp] = 0xF4
 
     def ram_write(self, address, value):
         self.ram[address] = value
@@ -80,21 +96,13 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        HLT  = 0b00000001
-        LDI  = 0b10000010
-        PRN  = 0b01000111
-        MUL  = 0b10100010
-        # print("LDI", LDI)
-        # print("PRN", PRN)
-        # print("HLT", HLT)
-        # print("MUL", MUL)
-        
+    
         running = True
         while running:
             # print("something", self.ram[self.pc])
             ir = self.ram[self.pc]
-            operand_a = self.ram_read(self.pc + 1)
-            operand_b = self.ram_read(self.pc + 2)
+            operand_a = self.ram_read(self.pc + 1) # next line in the machine code
+            operand_b = self.ram_read(self.pc + 2) # second next line in the machine code
 
             if ir == HLT:
                 running = False
@@ -111,5 +119,16 @@ class CPU:
             elif ir == MUL:
                 self.reg[operand_a] *= self.reg[operand_b]
                 self.pc += 3
+
+            elif ir == PUSH:
+                self.reg[sp] -= 1 #setting stack pointer down one index in memory
+                self.ram_write(self.reg[sp], self.reg[operand_a])
+                self.pc += 2
+            
+            elif ir == POP:
+                self.reg[operand_a] = self.ram_read(self.reg[sp])
+                self.reg[sp] += 1
+                self.pc += 2
+
 
 
