@@ -12,10 +12,10 @@ PRN  = 0b01000111
 MUL  = 0b10100010
 PUSH = 0b01000101
 POP  = 0b01000110
-# print("LDI", LDI)
-# print("PRN", PRN)
-# print("HLT", HLT)
-# print("MUL", MUL)
+CALL = 0b01010000
+RET  = 0b00010001
+ADD  = 0b10100000
+
 
 class CPU:
     """Main CPU class."""
@@ -101,7 +101,7 @@ class CPU:
         while running:
             # print("something", self.ram[self.pc])
             ir = self.ram[self.pc]
-            operand_a = self.ram_read(self.pc + 1) # next line in the machine code
+            operand_a = self.ram_read(self.pc + 1) # read the next line in the machine code
             operand_b = self.ram_read(self.pc + 2) # second next line in the machine code
 
             if ir == HLT:
@@ -130,5 +130,23 @@ class CPU:
                 self.reg[sp] += 1
                 self.pc += 2
 
+            elif ir == CALL:
+                
+                self.reg[sp] -= 1
+                self.ram_write(self.reg[sp], self.pc + 2)
 
+                
+                self.pc = self.reg[operand_a]
+            
+            elif ir == RET:
+                self.pc = self.ram_read(self.reg[sp])
+                self.reg[sp] += 1
+            
+            elif ir == ADD:
+                self.alu("ADD", operand_a, operand_b)
+                self.pc += 3
+            
+            else:
+                print(f"Unknown instruction: {ir}")
+                break
 
