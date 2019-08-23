@@ -34,9 +34,10 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.reg[sp] = 0xF4
-        self.E = 0
-        self.L = 0
-        self.G = 0
+        # self.E = 0
+        # self.L = 0
+        # self.G = 0
+        self.FLG = 0b00000000
 
     def ram_write(self, address, value):
         self.ram[address] = value
@@ -89,17 +90,20 @@ class CPU:
             if self.reg[reg_a] == self.reg[reg_b]:
                 # print(f"self.reg[reg_a] {self.reg[reg_a]}")
                 # print(f"self.reg[reg_b] {self.reg[reg_b]}")
-                self.E = 1
+                # self.E = 1
+                self.FLG = 0b00000001
                 # print(f"self.E {self.E}")
             elif self.reg[reg_a] < self.reg[reg_b]:
                 # print(f"less than self.reg[reg_a] {self.reg[reg_a]}")
                 # print(f"less than self.reg[reg_b] {self.reg[reg_b]}")
-                self.L = 1
+                # self.L = 1
+                self.FLG = 0b00000100
                 # print(f"self.L {self.L}")
             elif self.reg[reg_a] > self.reg[reg_b]:
                 # print(f"greater than self.reg[reg_a] {self.reg[reg_a]}")
                 # print(f"greater than self.reg[reg_b] {self.reg[reg_b]}")
-                self.G = 1
+                # self.G = 1
+                self.FLG = 0b00000010
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -188,7 +192,8 @@ class CPU:
                 # print("what does E equal", self.E)
                 # print("what does L equal", self.L)
 
-                if self.E == 1:
+                # if self.E == 1:
+                if self.FLG & 0b00000001 == 1:
                     # print("equal JEQ")
                     self.pc = self.reg[operand_a]
                 else:
@@ -196,7 +201,8 @@ class CPU:
                     self.pc += 2
             
             elif ir == JNE:
-                if self.E == 0:
+                # if self.E == 0:
+                if self.FLG & 0b00000001 == 0:
                     # print("not equal JNE", self.pc)
                     # print(self.reg[operand_a])
                     self.pc = self.reg[operand_a]
