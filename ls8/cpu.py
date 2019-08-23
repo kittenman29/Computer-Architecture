@@ -16,6 +16,13 @@ CALL = 0b01010000
 RET  = 0b00010001
 ADD  = 0b10100000
 
+CMP  = 0b10100111
+JMP  = 0b01010100
+JEQ  = 0b01010101
+JNE  = 0b01010110
+
+
+
 
 class CPU:
     """Main CPU class."""
@@ -27,6 +34,9 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.reg[sp] = 0xF4
+        self.E = 0
+        self.L = 0
+        self.G = 0
 
     def ram_write(self, address, value):
         self.ram[address] = value
@@ -71,6 +81,25 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+
+        elif op == "CMP":
+            
+            # print(f"print self.reg[reg_a] {self.reg[reg_a]}")
+            # print(f"print self.reg[reg_b] {self.reg[reg_b]}")
+            if self.reg[reg_a] == self.reg[reg_b]:
+                # print(f"self.reg[reg_a] {self.reg[reg_a]}")
+                # print(f"self.reg[reg_b] {self.reg[reg_b]}")
+                self.E = 1
+                # print(f"self.E {self.E}")
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                # print(f"less than self.reg[reg_a] {self.reg[reg_a]}")
+                # print(f"less than self.reg[reg_b] {self.reg[reg_b]}")
+                self.L = 1
+                # print(f"self.L {self.L}")
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                # print(f"greater than self.reg[reg_a] {self.reg[reg_a]}")
+                # print(f"greater than self.reg[reg_b] {self.reg[reg_b]}")
+                self.G = 1
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -102,7 +131,7 @@ class CPU:
             # print("something", self.ram[self.pc])
             ir = self.ram[self.pc]
             operand_a = self.ram_read(self.pc + 1) # read the next line in the machine code
-            operand_b = self.ram_read(self.pc + 2) # second next line in the machine code
+            operand_b = self.ram_read(self.pc + 2) # read the second next line in the machine code
 
             if ir == HLT:
                 running = False
@@ -145,6 +174,40 @@ class CPU:
             elif ir == ADD:
                 self.alu("ADD", operand_a, operand_b)
                 self.pc += 3
+            
+            elif ir == CMP:
+                self.alu("CMP", operand_a, operand_b)
+                self.pc += 3
+            
+            elif ir == JMP:
+                # print("JMP function", self.ram_read(self.reg[operand_a]))
+
+                self.pc = self.reg[operand_a]
+            
+            elif ir == JEQ:
+                # print("what does E equal", self.E)
+                # print("what does L equal", self.L)
+
+                if self.E == 1:
+                    # print("equal JEQ")
+                    self.pc = self.reg[operand_a]
+                else:
+                    # print("not equal JEQ")
+                    self.pc += 2
+            
+            elif ir == JNE:
+                if self.E == 0:
+                    # print("not equal JNE", self.pc)
+                    # print(self.reg[operand_a])
+                    self.pc = self.reg[operand_a]
+                    # print("not equal JNE", self.pc)
+                else:
+                    # print("equal JNE")
+                    self.pc += 2
+            elif ir == 0b00000000:
+                print("you're awesome!")
+                break
+                
             
             else:
                 print(f"Unknown instruction: {ir}")
